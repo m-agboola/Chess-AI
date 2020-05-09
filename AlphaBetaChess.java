@@ -3,16 +3,18 @@ public class AlphaBetaChess {
     static String chessBoard[][]={
             {"r","k","b","q","a","b","k","r"},
             {"p","p","p","p","p","p","p","p"},
+            {"K"," "," "," "," "," "," "," "},
             {" "," "," "," "," "," "," "," "},
             {" "," "," "," "," "," "," "," "},
             {" "," "," "," "," "," "," "," "},
-            {" ","R"," "," "," "," "," "," "},
             {"P","P","P","P","P","P","P","P"},
             {"R","K","B","Q","A","B","K","R"}};
 
-    static int kingPositionC, getKingPositionL;
+    static int kingPositionC, kingPositionL;
 
     public static void main(String[] args) {
+        while (!"A".equals(chessBoard[kingPositionC/8][kingPositionC%8])) {kingPositionC++;}//get white king's location
+        while (!"a".equals(chessBoard[kingPositionL/8][kingPositionL%8])) {kingPositionL++;}//get black king's location
 //       JFrame f = new JFrame("My Title Goes Here!");
 //        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //        UserInterface ui = new UserInterface();
@@ -46,7 +48,38 @@ public class AlphaBetaChess {
     }
 
     public static String possibleP(int i) {
-        String list = "";
+        String list="", oldPiece;
+        int r=i/8, c=i%8;
+        for (int j=-1; j<=1; j+=2) {
+            try {//capture
+                if (Character.isLowerCase(chessBoard[r-1][c+j].charAt(0)) && i>=16) {
+                    oldPiece=chessBoard[r-1][c+j];
+                    chessBoard[r][c]=" ";
+                    chessBoard[r-1][c+j]="P";
+                    if (kingSafe()) {
+                        list=list+r+c+(r-1)+(c+j)+oldPiece;
+                    }
+                    chessBoard[r][c]="P";
+                    chessBoard[r-1][c+j]=oldPiece;
+                }
+            } catch (Exception e) {}
+            try {//promotion && capture
+                if (Character.isLowerCase(chessBoard[r-1][c+j].charAt(0)) && i<16) {
+                    String[] temp={"Q","R","B","K"};
+                    for (int k=0; k<4; k++) {
+                        oldPiece=chessBoard[r-1][c+j];
+                        chessBoard[r][c]=" ";
+                        chessBoard[r-1][c+j]=temp[k];
+                        if (kingSafe()) {
+                            //column1,column2,captured-piece,new-piece,P
+                            list=list+c+(c+j)+oldPiece+temp[k]+"P";
+                        }
+                        chessBoard[r][c]="P";
+                        chessBoard[r-1][c+j]=oldPiece;
+                    }
+                }
+            } catch (Exception e) {}
+        }
         return list;
     }
     public static String possibleR(int i) {
@@ -109,7 +142,35 @@ public class AlphaBetaChess {
         return list;
     }
     public static String possibleK(int i) {
-        String list = "";
+        String list = "", oldPiece;
+        int r = i/8, c = i % 8;
+        for (int j=-1; j <=1; j+=2) {
+            for (int k=-1; k <=1; k+=2) {
+                try {
+                    if (Character.isLowerCase(chessBoard[r+j][c+k*2].charAt(0)) || " ".equals(chessBoard[r+j][c+k*2])) {
+                        oldPiece = chessBoard[r+j][c+k*2];
+                        chessBoard[r][c] = " ";
+                        if (kingSafe()) {
+                            list = list+r+c+(r+j)+(c+k*2)+oldPiece;
+                        }
+                        chessBoard[r][c] = "K";
+                        chessBoard[r+j][c+k*2] = oldPiece;
+                    }
+                } catch (Exception e) {}
+
+                try {
+                    if (Character.isLowerCase(chessBoard[r+j*2][c+k].charAt(0)) || " ".equals(chessBoard[r+j*2][c+k])) {
+                        oldPiece = chessBoard[r+j*2][c+k];
+                        chessBoard[r][c] = " ";
+                        if (kingSafe()) {
+                            list = list+r+c+(r+j*2)+(c+k)+oldPiece;
+                        }
+                        chessBoard[r][c] = "K";
+                        chessBoard[r+j*2][c+k] = oldPiece;
+                    }
+                } catch (Exception e) {}
+            }
+        }
         return list;
     }
     public static String possibleB(int i) {
@@ -214,7 +275,80 @@ public class AlphaBetaChess {
         return list;
     }
 
-    public static boolean kingSafe ( ) {
+    public static boolean kingSafe() {
+        //bishop/queen
+        int temp=1;
+        for (int i=-1; i<=1; i+=2) {
+            for (int j=-1; j<=1; j+=2) {
+                try {
+                    while(" ".equals(chessBoard[kingPositionC/8+temp*i][kingPositionC%8+temp*j])) {temp++;}
+                    if ("b".equals(chessBoard[kingPositionC/8+temp*i][kingPositionC%8+temp*j]) ||
+                            "q".equals(chessBoard[kingPositionC/8+temp*i][kingPositionC%8+temp*j])) {
+                        return false;
+                    }
+                } catch (Exception e) {}
+                temp=1;
+            }
+        }
+        //rook/queen
+        for (int i=-1; i<=1; i+=2) {
+            try {
+                while(" ".equals(chessBoard[kingPositionC/8][kingPositionC%8+temp*i])) {temp++;}
+                if ("r".equals(chessBoard[kingPositionC/8][kingPositionC%8+temp*i]) ||
+                        "q".equals(chessBoard[kingPositionC/8][kingPositionC%8+temp*i])) {
+                    return false;
+                }
+            } catch (Exception e) {}
+            temp=1;
+            try {
+                while(" ".equals(chessBoard[kingPositionC/8+temp*i][kingPositionC%8])) {temp++;}
+                if ("r".equals(chessBoard[kingPositionC/8+temp*i][kingPositionC%8]) ||
+                        "q".equals(chessBoard[kingPositionC/8+temp*i][kingPositionC%8])) {
+                    return false;
+                }
+            } catch (Exception e) {}
+            temp=1;
+        }
+        //knight
+        for (int i=-1; i<=1; i+=2) {
+            for (int j=-1; j<=1; j+=2) {
+                try {
+                    if ("k".equals(chessBoard[kingPositionC/8+i][kingPositionC%8+j*2])) {
+                        return false;
+                    }
+                } catch (Exception e) {}
+                try {
+                    if ("k".equals(chessBoard[kingPositionC/8+i*2][kingPositionC%8+j])) {
+                        return false;
+                    }
+                } catch (Exception e) {}
+            }
+        }
+        //pawn
+        if (kingPositionC>=16) {
+            try {
+                if ("p".equals(chessBoard[kingPositionC/8-1][kingPositionC%8-1])) {
+                    return false;
+                }
+            } catch (Exception e) {}
+            try {
+                if ("p".equals(chessBoard[kingPositionC/8-1][kingPositionC%8+1])) {
+                    return false;
+                }
+            } catch (Exception e) {}
+            //king
+            for (int i=-1; i<=1; i++) {
+                for (int j=-1; j<=1; j++) {
+                    if (i!=0 || j!=0) {
+                        try {
+                            if ("a".equals(chessBoard[kingPositionC/8+i][kingPositionC%8+j])) {
+                                return false;
+                            }
+                        } catch (Exception e) {}
+                    }
+                }
+            }
+        }
         return true;
     }
 
