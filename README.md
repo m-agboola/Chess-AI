@@ -3,7 +3,7 @@ A Chess Engine using Minimax Algorithm with Alpha Beta Pruning
 
 ###### Motivation
 The aim of starting this project is to learn Java while working on something challenging yet fun. 
-In this project, code quality and readability was just as important as performance and optimizations. This is a continuous project and I will try to improve it as much as I can.
+Code quality and readability is my main focus for now. As this is a continuous project, performance and optimizations will be improved upon with time.
 
 ###### How it works
 The computer player uses the minimax strategy with alpha-beta pruning for generating and deciding moves. It explores all possible moves, then explores their possible moves and so on. This essentially creates a search tree to a depth of 3. The best move is decided by evaluating the 'score' of the board. Zobrist hashing is used to store best moves for previously evaluated position and really speed up move generations.
